@@ -16,16 +16,13 @@
             <description value="Watermark images should be able to be uploaded in the admin"/>
             <severity value="MAJOR"/>
             <testCaseId value="MC-5796"/>
-            <skip>
-                <issueId value="MC-18496"/>
-            </skip>
             <group value="Watermark"/>
         </annotations>
         <before>
-            <actionGroup ref="AdminLoginActionGroup" stepKey="loginToAdminArea"/>
+            <actionGroup ref="LoginAsAdmin" stepKey="loginToAdminArea"/>
         </before>
         <after>
-            <actionGroup ref="AdminLogoutActionGroup" stepKey="logoutOfAdmin"/>
+            <actionGroup ref="logout" stepKey="logoutOfAdmin"/>
         </after>
         <amOnPage url="{{DesignConfigPage.url}}" stepKey="navigateToDesignConfigPage" />
         <waitForPageLoad stepKey="waitForPageload1"/>
