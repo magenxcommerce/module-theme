@@ -3,13 +3,10 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-
-declare(strict_types=1);
-
 namespace Magento\Theme\Model\Design\Backend;
 
-use Magento\Config\Model\Config\Backend\File as BackendFile;
 use Magento\Config\Model\Config\Backend\File\RequestData\RequestDataInterface;
+use Magento\Config\Model\Config\Backend\File as BackendFile;
 use Magento\Framework\App\Cache\TypeListInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\ObjectManager;
@@ -17,18 +14,14 @@ use Magento\Framework\Data\Collection\AbstractDb;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\File\Mime;
 use Magento\Framework\Filesystem;
-use Magento\Framework\Filesystem\Io\File as IoFileSystem;
 use Magento\Framework\Model\Context;
 use Magento\Framework\Model\ResourceModel\AbstractResource;
 use Magento\Framework\Registry;
 use Magento\Framework\UrlInterface;
-use Magento\MediaStorage\Helper\File\Storage\Database;
 use Magento\MediaStorage\Model\File\UploaderFactory;
 use Magento\Theme\Model\Design\Config\FileUploader\FileProcessor;
 
 /**
- * File Backend
- *
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class File extends BackendFile
@@ -44,16 +37,6 @@ class File extends BackendFile
     private $mime;
 
     /**
-     * @var IoFileSystem
-     */
-    private $ioFileSystem;
-
-    /**
-     * @var Database
-     */
-    private $databaseHelper;
-
-    /**
      * @param Context $context
      * @param Registry $registry
      * @param ScopeConfigInterface $config
@@ -65,8 +48,6 @@ class File extends BackendFile
      * @param AbstractResource|null $resource
      * @param AbstractDb|null $resourceCollection
      * @param array $data
-     * @param Database $databaseHelper
-     * @param IoFileSystem $ioFileSystem
      * @SuppressWarnings(PHPMD.ExcessiveParameterList)
      */
     public function __construct(
@@ -80,9 +61,7 @@ class File extends BackendFile
         UrlInterface $urlBuilder,
         AbstractResource $resource = null,
         AbstractDb $resourceCollection = null,
-        array $data = [],
-        Database $databaseHelper = null,
-        IoFileSystem $ioFileSystem = null
+        array $data = []
     ) {
         parent::__construct(
             $context,
@@ -97,8 +76,6 @@ class File extends BackendFile
             $data
         );
         $this->urlBuilder = $urlBuilder;
-        $this->databaseHelper = $databaseHelper ?: ObjectManager::getInstance()->get(Database::class);
-        $this->ioFileSystem = $ioFileSystem ?: ObjectManager::getInstance()->get(IoFileSystem::class);
     }
 
     /**
@@ -111,43 +88,41 @@ class File extends BackendFile
     {
         $values = $this->getValue();
         $value = reset($values) ?: [];
-
-        // Need to check name when it is uploaded in the media gallary
-        $file = $value['file'] ?? $value['name'] ?? null;
-        if (!isset($file)) {
+        if (!isset($value['file'])) {
             throw new LocalizedException(
                 __('%1 does not contain field \'file\'', $this->getData('field_config/field'))
             );
         }
-
-        if (!empty($this->getAllowedExtensions()) &&
-            (!isset($this->ioFileSystem->getPathInfo($file)['extension']) ||
-            !in_array($this->ioFileSystem->getPathInfo($file)['extension'], $this->getAllowedExtensions()))
-        ) {
-            throw new LocalizedException(
-                __('Something is wrong with the file upload settings.')
-            );
-        }
-
         if (isset($value['exists'])) {
-            $this->setValue($file);
+            $this->setValue($value['file']);
             return $this;
         }
 
-        //phpcs:ignore Magento2.Functions.DiscouragedFunction
-        $this->updateMediaDirectory(basename($file), $value['url']);
+        $filename = basename($value['file']);
+        $result = $this->_mediaDirectory->copyFile(
+            $this->getTmpMediaPath($filename),
+            $this->_getUploadDir() . '/' . $filename
+        );
+        if ($result) {
+            $this->_mediaDirectory->delete($this->getTmpMediaPath($filename));
+            if ($this->_addWhetherScopeInfo()) {
+                $filename = $this->_prependScopeInfo($filename);
+            }
+            $this->setValue($filename);
+        } else {
+            $this->unsValue();
+        }
 
         return $this;
     }
 
     /**
-     * @inheritDoc
+     * @return array
      */
     public function afterLoad()
     {
         $value = $this->getValue();
         if ($value && !is_array($value)) {
-            //phpcs:ignore Magento2.Functions.DiscouragedFunction
             $fileName = $this->_getUploadDir() . '/' . basename($value);
             $fileInfo = null;
             if ($this->_mediaDirectory->isExist($fileName)) {
@@ -158,7 +133,6 @@ class File extends BackendFile
                         'url' => $url,
                         'file' => $value,
                         'size' => is_array($stat) ? $stat['size'] : 0,
-                        //phpcs:ignore Magento2.Functions.DiscouragedFunction
                         'name' => basename($value),
                         'type' => $this->getMimeType($fileName),
                         'exists' => true,
@@ -192,8 +166,6 @@ class File extends BackendFile
     }
 
     /**
-     * Get Value
-     *
      * @return array
      */
     public function getValue()
@@ -217,7 +189,7 @@ class File extends BackendFile
             $urlType = ['_type' => empty($baseUrl['type']) ? 'link' : (string)$baseUrl['type']];
             $baseUrl = $baseUrl['value'] . '/';
         }
-        return $this->urlBuilder->getBaseUrl($urlType) . $baseUrl . $fileName;
+        return $this->urlBuilder->getBaseUrl($urlType) . $baseUrl  . $fileName;
     }
 
     /**
@@ -258,54 +230,5 @@ class File extends BackendFile
             $this->mime = ObjectManager::getInstance()->get(Mime::class);
         }
         return $this->mime;
-    }
-
-    /**
-     * Get Relative Media Path
-     *
-     * @param string $path
-     * @return string
-     */
-    private function getRelativeMediaPath(string $path): string
-    {
-        return preg_split('/\/(pub\/)?media\//', $path)[1] ?? preg_replace('/\/(pub\/)?media\//', '', $path);
-    }
-
-    /**
-     * Move file to the correct media directory
-     *
-     * @param string $filename
-     * @param string $url
-     * @throws LocalizedException
-     */
-    private function updateMediaDirectory(string $filename, string $url)
-    {
-        $relativeMediaPath = $this->getRelativeMediaPath($url);
-        $tmpMediaPath = $this->getTmpMediaPath($filename);
-        $mediaPath = $this->_mediaDirectory->isFile($relativeMediaPath) ? $relativeMediaPath : $tmpMediaPath;
-        $destinationMediaPath = $this->_getUploadDir() . '/' . $filename;
-
-        $result = $mediaPath === $destinationMediaPath;
-        if (!$result) {
-            $result = $this->_mediaDirectory->copyFile(
-                $mediaPath,
-                $destinationMediaPath
-            );
-            $this->databaseHelper->renameFile(
-                $mediaPath,
-                $destinationMediaPath
-            );
-        }
-        if ($result) {
-            if ($mediaPath === $tmpMediaPath) {
-                $this->_mediaDirectory->delete($mediaPath);
-            }
-            if ($this->_addWhetherScopeInfo()) {
-                $filename = $this->_prependScopeInfo($filename);
-            }
-            $this->setValue($filename);
-        } else {
-            $this->unsValue();
-        }
     }
 }

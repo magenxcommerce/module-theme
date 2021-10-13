@@ -3,16 +3,13 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-/**
- * @var $block \Magento\Theme\Block\Adminhtml\System\Design\Theme\Edit\Tab\Css
- * @var \Magento\Framework\View\Helper\SecureHtmlRenderer $secureRenderer
- */
 ?>
+
+<?php /** @var $block \Magento\Theme\Block\Adminhtml\System\Design\Theme\Edit\Tab\Css */ ?>
 
 <?= $block->getFormHtml() ?>
 
-<?php $scriptString = <<<script
-
+<script>
 require([
     "jquery",
     "Magento_Ui/js/modal/alert",
@@ -23,7 +20,7 @@ require([
     $( '#css_file_uploader' ).fileupload({
         dataType: 'json',
         replaceFileInput: false,
-        url : '{$block->escapeJs($block->getUrl('*/system_design_theme/uploadcss'))}',
+        url : '<?= /* @escapeNotVerified */ $block->getUrl('*/system_design_theme/uploadcss') ?>',
         acceptFileTypes: /(.|\/)(css)$/i,
 
         /**
@@ -80,7 +77,4 @@ require([
     });
 
 });
-
-script;
-?>
-<?= /* @noEscape */ $secureRenderer->renderTag('script', [], $scriptString, false) ?>
+</script>

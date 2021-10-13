@@ -3,16 +3,11 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-
-/**
- * @var $block \Magento\Theme\Block\Adminhtml\System\Design\Theme\Edit\Tab\Js
- * @var \Magento\Framework\View\Helper\SecureHtmlRenderer $secureRenderer
- */
 ?>
+<?php /** @var $block \Magento\Theme\Block\Adminhtml\System\Design\Theme\Edit\Tab\Js */ ?>
 <?= $block->getFormHtml() ?>
 
-<?php $scriptString = <<<script
-
+<script>
 require([
     "jquery",
     "mage/template",
@@ -26,7 +21,7 @@ require([
         dataType: 'json',
         replaceFileInput: false,
         sequentialUploads: true,
-        url: '{$block->escapeJs($block->getJsUploadUrl())}',
+        url: '<?= /* @escapeNotVerified */ $block->getJsUploadUrl() ?>',
 
         /**
          * Add data
@@ -129,7 +124,4 @@ require([
 
 
 });
-
-script;
-?>
-<?= /* @noEscape */ $secureRenderer->renderTag('script', [], $scriptString, false) ?>
+</script>

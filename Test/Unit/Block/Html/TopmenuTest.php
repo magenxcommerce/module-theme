@@ -3,7 +3,6 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-declare(strict_types=1);
 
 namespace Magento\Theme\Test\Unit\Block\Html;
 
@@ -19,47 +18,47 @@ use Magento\Theme\Block\Html\Topmenu;
 class TopmenuTest extends \PHPUnit\Framework\TestCase
 {
     /**
-     * @var \Magento\Framework\UrlInterface|\PHPUnit\Framework\MockObject\MockObject
+     * @var \Magento\Framework\UrlInterface|\PHPUnit_Framework_MockObject_MockObject
      */
     protected $urlBuilder;
 
     /**
-     * @var Registry|\PHPUnit\Framework\MockObject\MockObject
+     * @var Registry|\PHPUnit_Framework_MockObject_MockObject
      */
     protected $registry;
 
     /**
-     * @var Context|\PHPUnit\Framework\MockObject\MockObject
+     * @var Context|\PHPUnit_Framework_MockObject_MockObject
      */
     protected $context;
 
     /**
-     * @var NodeFactory|\PHPUnit\Framework\MockObject\MockObject
+     * @var NodeFactory|\PHPUnit_Framework_MockObject_MockObject
      */
     protected $nodeFactory;
 
     /**
-     * @var TreeFactory|\PHPUnit\Framework\MockObject\MockObject
+     * @var TreeFactory|\PHPUnit_Framework_MockObject_MockObject
      */
     protected $treeFactory;
 
     /**
-     * @var \Magento\Catalog\Model\Category|\PHPUnit\Framework\MockObject\MockObject
+     * @var \Magento\Catalog\Model\Category|\PHPUnit_Framework_MockObject_MockObject
      */
     protected $category;
 
     /**
-     * @var \Magento\Store\Model\StoreManagerInterface|\PHPUnit\Framework\MockObject\MockObject
+     * @var \Magento\Store\Model\StoreManagerInterface|\PHPUnit_Framework_MockObject_MockObject
      */
     protected $storeManager;
 
     /**
-     * @var \Magento\Framework\Event\ManagerInterface|\PHPUnit\Framework\MockObject\MockObject
+     * @var \Magento\Framework\Event\ManagerInterface|\PHPUnit_Framework_MockObject_MockObject
      */
     private $eventManagerMock;
 
     /**
-     * @var \Magento\Framework\App\RequestInterface|\PHPUnit\Framework\MockObject\MockObject
+     * @var \Magento\Framework\App\RequestInterface|\PHPUnit_Framework_MockObject_MockObject
      */
     private $requestMock;
 
@@ -77,7 +76,7 @@ HTML;
 
     // @codingStandardsIgnoreEnd
 
-    protected function setUp(): void
+    protected function setUp()
     {
         $this->storeManager = $this->getMockBuilder(\Magento\Store\Model\StoreManagerInterface::class)
             ->getMockForAbstractClass();
@@ -190,6 +189,7 @@ HTML;
         $treeFactory = $this->createMock(\Magento\Framework\Data\TreeFactory::class);
 
         $topmenu =  new Topmenu($this->context, $nodeFactory, $treeFactory);
+        $this->urlBuilder->expects($this->once())->method('getUrl')->with('*/*/*')->willReturn('123');
         $this->urlBuilder->expects($this->once())->method('getBaseUrl')->willReturn('baseUrl');
         $store = $this->getMockBuilder(\Magento\Store\Model\Store::class)
             ->disableOriginalConstructor()
@@ -199,7 +199,7 @@ HTML;
         $this->storeManager->expects($this->once())->method('getStore')->willReturn($store);
 
         $this->assertEquals(
-            ['BLOCK_TPL', '321', null, 'base_url' => 'baseUrl', 'template' => null],
+            ['BLOCK_TPL', '321', null, 'base_url' => 'baseUrl', 'template' => null, '123'],
             $topmenu->getCacheKeyInfo()
         );
     }
@@ -210,7 +210,7 @@ HTML;
      * Helper method, that provides unified logic of creation of Tree Node mock objects.
      *
      * @param bool $isCurrentItem
-     * @return \PHPUnit\Framework\MockObject\MockObject
+     * @return \PHPUnit_Framework_MockObject_MockObject
      */
     private function buildTree($isCurrentItem)
     {

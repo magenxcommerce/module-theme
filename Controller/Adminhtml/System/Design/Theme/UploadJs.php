@@ -4,21 +4,19 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-
 namespace Magento\Theme\Controller\Adminhtml\System\Design\Theme;
-
-use Magento\Framework\App\Action\HttpGetActionInterface;
 
 /**
  * Class UploadJs
- * @deprecated 101.0.0
+ * @deprecated
  */
-class UploadJs extends \Magento\Theme\Controller\Adminhtml\System\Design\Theme implements HttpGetActionInterface
+class UploadJs extends \Magento\Theme\Controller\Adminhtml\System\Design\Theme
 {
     /**
      * Upload js file
      *
      * @return void
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function execute()
     {

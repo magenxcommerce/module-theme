@@ -13,7 +13,7 @@ use Magento\Store\Model\ScopeInterface;
 use Magento\Ui\Component\Listing\Columns\Column;
 
 /**
- * Class EditAction for Listing Column
+ * Class EditAction
  */
 class EditAction extends Column
 {
@@ -73,7 +73,7 @@ class EditAction extends Column
                                     'scope_id' => $scopeId,
                                 ]
                             ),
-                            'label' => __('Edit'),
+                            'label' => __('Edit')
                         ]
                     ];
                 }

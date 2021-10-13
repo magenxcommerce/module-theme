@@ -3,7 +3,6 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-declare(strict_types=1);
 
 /**
  * Test theme customization config model
@@ -11,49 +10,39 @@ declare(strict_types=1);
 namespace Magento\Theme\Test\Unit\Model\Config;
 
 use Magento\Framework\App\Area;
-use Magento\Framework\DataObject;
-use Magento\Framework\View\DesignInterface;
-use Magento\Store\Model\StoreManagerInterface;
-use Magento\Theme\Model\Config\Customization;
-use Magento\Theme\Model\ResourceModel\Theme\Collection;
-use Magento\Theme\Model\Theme\ThemeProvider;
-use PHPUnit\Framework\MockObject\MockObject;
-use PHPUnit\Framework\TestCase;
 
-class CustomizationTest extends TestCase
+class CustomizationTest extends \PHPUnit\Framework\TestCase
 {
     /**
-     * @var StoreManagerInterface
+     * @var \Magento\Store\Model\StoreManagerInterface
      */
     protected $storeManager;
 
     /**
-     * @var DesignInterface|MockObject
+     * @var \Magento\Framework\View\DesignInterface|\PHPUnit_Framework_MockObject_MockObject
      */
     protected $designPackage;
 
     /**
-     * @var Collection
+     * @var \Magento\Theme\Model\ResourceModel\Theme\Collection
      */
     protected $themeCollection;
 
     /**
-     * @var Customization
+     * @var \Magento\Theme\Model\Config\Customization
      */
     protected $model;
 
     /**
-     * @var ThemeProvider|\PHPUnit\Framework\MockObject_MockBuilder
+     * @var \Magento\Theme\Model\Theme\ThemeProvider|\PHPUnit\Framework\MockObject_MockBuilder
      */
     protected $themeProviderMock;
 
-    protected function setUp(): void
+    protected function setUp()
     {
-        $this->storeManager = $this->getMockBuilder(StoreManagerInterface::class)
-            ->getMock();
-        $this->designPackage = $this->getMockBuilder(DesignInterface::class)
-            ->getMock();
-        $this->themeCollection = $this->getMockBuilder(Collection::class)
+        $this->storeManager = $this->getMockBuilder(\Magento\Store\Model\StoreManagerInterface::class)->getMock();
+        $this->designPackage = $this->getMockBuilder(\Magento\Framework\View\DesignInterface::class)->getMock();
+        $this->themeCollection = $this->getMockBuilder(\Magento\Theme\Model\ResourceModel\Theme\Collection::class)
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -62,14 +51,14 @@ class CustomizationTest extends TestCase
             ->setMethods(['create'])
             ->getMock();
 
-        $collectionFactory->expects($this->any())->method('create')->willReturn($this->themeCollection);
+        $collectionFactory->expects($this->any())->method('create')->will($this->returnValue($this->themeCollection));
 
-        $this->themeProviderMock = $this->getMockBuilder(ThemeProvider::class)
+        $this->themeProviderMock = $this->getMockBuilder(\Magento\Theme\Model\Theme\ThemeProvider::class)
             ->disableOriginalConstructor()
             ->setMethods(['getThemeCustomizations', 'getThemeByFullPath'])
             ->getMock();
 
-        $this->model = new Customization(
+        $this->model = new \Magento\Theme\Model\Config\Customization(
             $this->storeManager,
             $this->designPackage,
             $this->themeProviderMock
@@ -164,7 +153,7 @@ class CustomizationTest extends TestCase
             ->willReturn([$this->getAssignedTheme(), $this->getUnassignedTheme()]);
 
         $themeAssigned = $this->model->isThemeAssignedToStore($this->getAssignedTheme());
-        $this->assertTrue($themeAssigned);
+        $this->assertEquals(true, $themeAssigned);
     }
 
     /**
@@ -178,30 +167,30 @@ class CustomizationTest extends TestCase
             ->willReturn($this->getAssignedTheme()->getId());
 
         $themeUnassigned = $this->model->isThemeAssignedToStore($this->getUnassignedTheme(), $this->getStore());
-        $this->assertFalse($themeUnassigned);
+        $this->assertEquals(false, $themeUnassigned);
     }
 
     /**
-     * @return DataObject
+     * @return \Magento\Framework\DataObject
      */
     protected function getAssignedTheme()
     {
-        return new DataObject(['id' => 1, 'theme_path' => 'Magento/luma']);
+        return new \Magento\Framework\DataObject(['id' => 1, 'theme_path' => 'Magento/luma']);
     }
 
     /**
-     * @return DataObject
+     * @return \Magento\Framework\DataObject
      */
     protected function getUnassignedTheme()
     {
-        return new DataObject(['id' => 2, 'theme_path' => 'Magento/blank']);
+        return new \Magento\Framework\DataObject(['id' => 2, 'theme_path' => 'Magento/blank']);
     }
 
     /**
-     * @return DataObject
+     * @return \Magento\Framework\DataObject
      */
     protected function getStore()
     {
-        return new DataObject(['id' => 55]);
+        return new \Magento\Framework\DataObject(['id' => 55]);
     }
 }
