@@ -7,9 +7,8 @@
 namespace Magento\Theme\Controller\Adminhtml\System\Design\Theme;
 
 /**
- * Class Save use to save Theme data
+ * Class Save
  * @deprecated 100.2.0
- * @SuppressWarnings(PHPMD.AllPurposeAction)
  */
 class Save extends \Magento\Theme\Controller\Adminhtml\System\Design\Theme
 {
@@ -52,9 +51,7 @@ class Save extends \Magento\Theme\Controller\Adminhtml\System\Design\Theme
                 if ($theme && !$theme->isEditable()) {
                     throw new \Magento\Framework\Exception\LocalizedException(__('This theme is not editable.'));
                 }
-                $theme->addData(
-                    $this->extractMutableData($themeData)
-                );
+                $theme->addData($themeData);
                 if (isset($themeData['preview']['delete'])) {
                     $theme->getThemeImage()->removePreviewImage();
                 }
@@ -82,19 +79,5 @@ class Save extends \Magento\Theme\Controller\Adminhtml\System\Design\Theme
         $redirectBack
             ? $this->_redirect('adminhtml/*/edit', ['id' => $theme->getId()])
             : $this->_redirect('adminhtml/*/');
-    }
-
-    /**
-     * Extract required attributes
-     *
-     * @param array $postData
-     * @return array
-     */
-    private function extractMutableData(array $postData): array
-    {
-        if (!empty($postData['theme_title'])) {
-            return ['theme_title' => $postData['theme_title']];
-        }
-        return [];
     }
 }
