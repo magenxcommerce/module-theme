@@ -33,7 +33,7 @@ class StoreUserAgentThemeResolverTest extends TestCase
      */
     private $model;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->scopeConfig = $this->createMock(ScopeConfigInterface::class);
@@ -51,7 +51,7 @@ class StoreUserAgentThemeResolverTest extends TestCase
      * @param array $expected
      * @dataProvider getThemesDataProvider
      */
-    public function testGetThemes(?array $config, array $expected): void
+    public function testGetThemes(?array $config, array $expected)
     {
         $store = $this->createMock(StoreInterface::class);
         $this->scopeConfig->expects($this->once())

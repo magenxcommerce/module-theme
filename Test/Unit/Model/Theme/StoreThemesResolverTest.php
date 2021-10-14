@@ -30,7 +30,7 @@ class StoreThemesResolverTest extends TestCase
     /**
      * @inheritDoc
      */
-    protected function setUp(): void
+    protected function setUp()
     {
         parent::setUp();
         $this->resolvers = [];
@@ -43,7 +43,7 @@ class StoreThemesResolverTest extends TestCase
     /**
      * Test that constructor SHOULD throw an exception when resolver is not instance of StoreThemesResolverInterface.
      */
-    public function testInvalidConstructorArguments(): void
+    public function testInvalidConstructorArguments()
     {
         $resolver = $this->createMock(StoreInterface::class);
         $this->expectExceptionObject(
@@ -69,7 +69,7 @@ class StoreThemesResolverTest extends TestCase
      * @param array $expected
      * @dataProvider getThemesDataProvider
      */
-    public function testGetThemes(array $themes, array $expected): void
+    public function testGetThemes(array $themes, array $expected)
     {
         $store = $this->createMock(StoreInterface::class);
         foreach ($this->resolvers as $key => $resolver) {
